@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin • Focus Mobilidade</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+.admin-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.admin-nav{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+.admin-nav button{flex:1;min-width:120px}
+.panel-section{display:none}.panel-section.active{display:block}
+.kpi{font-size:30px;font-weight:900;color:var(--gold);margin:8px 0}
+.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:620px}
+th,td{text-align:left;padding:11px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:top}
+th{color:var(--gold);font-weight:800}
+.pill{display:inline-block;padding:4px 9px;border-radius:20px;background:#292929;font-size:11px}
+.pill.good{background:#203328;color:#9be6bd}.pill.warn{background:#382b13;color:#f3d58b}.pill.bad{background:#421e1e;color:#ffaaaa}
+#liveMap{height:390px;border-radius:14px;border:1px solid var(--line);background:#111;overflow:hidden}
+.empty{padding:18px;border:1px dashed var(--line);border-radius:12px;color:var(--muted)}
+.login-card{max-width:460px;margin:30px auto}
+.small-note{font-size:12px;color:var(--muted);line-height:1.5}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.toolbar input{max-width:320px}
+@media(max-width:560px){#liveMap{height:300px}.admin-nav button{min-width:calc(50% - 8px)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="header">
+<a href="index.html"><img src="assets/logo.png" alt="Focus"></a>
+<div><div class="brand">FOCUS<small>PAINEL ADMINISTRATIVO</small></div><div class="slogan">Área de gestão da Mobilidade Urbana</div></div>
+</header>
+
+<section id="loginArea" class="card login-card">
+<div class="eyebrow">Acesso restrito</div>
+<h1>Entrar no painel</h1>
+<p class="muted">Acesso exclusivo para contas autorizadas como administradoras no Supabase.</p>
+<form id="loginForm">
+<label for="email">E-mail</label><input id="email" type="email" autocomplete="username" required>
+<label for="password">Senha</label><input id="password" type="password" autocomplete="current-password" required>
+<button class="btn" type="submit" style="width:100%;margin-top:16px">Entrar</button>
+</form>
+<p id="loginMessage" class="small-note" aria-live="polite"></p>
+</section>
+
+<main id="adminArea" class="hidden">
+<div class="admin-top">
+<div><div class="eyebrow">Central de operações</div><h1 style="margin:6px 0">Painel Focus</h1><div id="adminIdentity" class="muted small"></div></div>
+<button id="logoutBtn" class="btn secondary" type="button">Sair</button>
+</div>
+<div id="connectionStatus" class="notice" style="margin:14px 0">Conectando ao Supabase…</div>
+<nav class="admin-nav" aria-label="Seções administrativas">
+<button class="btn secondary" data-tab="overview">Visão geral</button>
+<button class="btn secondary" data-tab="rides">Corridas</button>
+<button class="btn secondary" data-tab="map">Mapa ao vivo</button>
+<button class="btn secondary" data-tab="drivers">Motoristas</button>
+<button class="btn secondary" data-tab="reviews">Verificações</button>
+</nav>
+
+<section id="tab-overview" class="panel-section active">
+<div class="grid">
+<div class="card"><div class="muted">Passageiros</div><div class="kpi" id="kpiPassengers">—</div></div>
+<div class="card"><div class="muted">Motoristas cadastrados</div><div class="kpi" id="kpiDrivers">—</div></div>
+<div class="card"><div class="muted">Corridas em andamento</div><div class="kpi" id="kpiActiveRides">—</div></div>
+<div class="card"><div class="muted">Verificações pendentes</div><div class="kpi" id="kpiPending">—</div></div>
+</div>
+<div class="card"><h2>Últimas corridas</h2><div id="recentRides" class="empty">Carregando…</div></div>
+</section>
+
+<section id="tab-rides" class="panel-section">
+<div class="card"><div class="admin-top"><h2>Corridas</h2><button id="refreshRides" class="btn secondary" type="button">Atualizar</button></div><div id="ridesTable" class="empty">Carregando…</div></div>
+</section>
+
+<section id="tab-map" class="panel-section">
+<div class="card"><h2>Monitoramento em tempo real</h2>
+<p class="muted">Mostra posições compartilhadas pelos motoristas vinculadas a corridas ativas. A atualização depende do aplicativo do motorista enviar coordenadas GPS autorizadas.</p>
+<div id="liveMap"></div><p id="mapMessage" class="small-note"></p>
+</div>
+<div class="card"><h3>Localizações recentes</h3><div id="locationsTable" class="empty">Carregando…</div></div>
+</section>
+
+<section id="tab-drivers" class="panel-section">
+<div class="card"><div class="admin-top"><h2>Motoristas</h2><button id="refreshDrivers" class="btn secondary" type="button">Atualizar</button></div><div id="driversTable" class="empty">Carregando…</div></div>
+</section>
+
+<section id="tab-reviews" class="panel-section">
+<div class="card"><div class="admin-top"><h2>Fila de verificações</h2><button id="refreshReviews" class="btn secondary" type="button">Atualizar</button></div>
+<p class="muted">Esta versão consulta os casos e seus status. Aprovar/reprovar ficará desabilitado até instalarmos funções de servidor que validem o fornecedor biométrico, registrem auditoria e apliquem os prazos de retenção.</p>
+<div id="reviewsTable" class="empty">Carregando…</div></div>
+</section>
+</main>
+<footer class="footer"><a href="index.html">Voltar para Focus Mobilidade</a></footer>
+</div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(() => {
+  const cfg = window.FOCUS_CONFIG || {};
+  const $ = id => document.getElementById(id);
+  const loginArea = $('loginArea'), adminArea = $('adminArea');
+  let sb = null, currentUser = null, map = null, markers = new Map(), channel = null;
+  const activeStatuses = ['accepted','driver_arriving','in_progress'];
+  const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const date = value => value ? new Date(value).toLocaleString('pt-BR') : '—';
+  const statusPill = s => `<span class="pill ${s==='approved'||s==='completed'?'good':s==='rejected'||s==='cancelled'?'bad':'warn'}">${esc(s||'—')}</span>`;
+  const msg = (text, good=false) => { $('connectionStatus').textContent=text; $('connectionStatus').className=good?'notice':'notice warning'; };
+
+  function table(headers, rows) {
+    if (!rows.length) return '<div class="empty">Nenhum registro encontrado.</div>';
+    return `<div class="table-wrap"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div>`;
+  }
+
+  async function loadOverview() {
+    const [profiles, drivers, rides, pending] = await Promise.all([
+      sb.from('profiles').select('id,account_type',{count:'exact',head:true}),
+      sb.from('driver_profiles').select('user_id',{count:'exact',head:true}),
+      sb.from('rides').select('id,status,created_at,origin_address,destination_address,passenger_id,driver_id').order('created_at',{ascending:false}).limit(8),
+      sb.from('verification_cases').select('id',{count:'exact',head:true}).in('status',['pending','automatic_review','manual_review'])
+    ]);
+    [profiles,drivers,rides,pending].forEach(r=>{if(r.error)throw r.error});
+    $('kpiPassengers').textContent = profiles.count ?? '—';
+    $('kpiDrivers').textContent = drivers.count ?? '—';
+    $('kpiActiveRides').textContent = (rides.data||[]).filter(r=>activeStatuses.includes(r.status)).length;
+    $('kpiPending').textContent = pending.count ?? '—';
+    $('recentRides').innerHTML = table(['Status','Origem','Destino','Solicitada'],(rides.data||[]).map(r=>`<tr><td>${statusPill(r.status)}</td><td>${esc(r.origin_address)}</td><td>${esc(r.destination_address)}</td><td>${date(r.created_at)}</td></tr>`));
+  }
+
+  async function loadRides() {
+    const {data,error}=await sb.from('rides').select('id,status,origin_address,destination_address,passenger_id,driver_id,estimated_fare,final_fare,created_at,started_at,completed_at').order('created_at',{ascending:false}).limit(100);
+    if(error)throw error;
+    $('ridesTable').innerHTML=table(['ID','Status','Origem','Destino','Passageiro','Motorista','Valor','Criada'],(data||[]).map(r=>`<tr><td>${esc(r.id.slice(0,8))}</td><td>${statusPill(r.status)}</td><td>${esc(r.origin_address)}</td><td>${esc(r.destination_address)}</td><td>${esc(r.passenger_id.slice(0,8))}</td><td>${esc(r.driver_id?.slice(0,8)||'—')}</td><td>${r.final_fare??r.estimated_fare??'—'}</td><td>${date(r.created_at)}</td></tr>`));
+  }
+
+  async function loadDrivers() {
+    const {data,error}=await sb.from('driver_profiles').select('user_id,vehicle_model,vehicle_plate,vehicle_color,driver_status,is_online,verification_valid_until,updated_at').order('updated_at',{ascending:false}).limit(200);
+    if(error)throw error;
+    $('driversTable').innerHTML=table(['Motorista','Veículo','Placa','Situação','Online','Verificação válida até'],(data||[]).map(d=>`<tr><td>${esc(d.user_id)}</td><td>${esc(d.vehicle_model)} ${esc(d.vehicle_color)}</td><td>${esc(d.vehicle_plate)}</td><td>${statusPill(d.driver_status)}</td><td>${d.is_online?'<span class="pill good">Sim</span>':'Não'}</td><td>${date(d.verification_valid_until)}</td></tr>`));
+  }
+
+  async function loadReviews() {
+    const {data,error}=await sb.from('verification_cases').select('id,user_id,account_type,verification_type,status,provider_reference,review_notes,created_at,decided_at').order('created_at',{ascending:false}).limit(200);
+    if(error)throw error;
+    $('reviewsTable').innerHTML=table(['Caso','Usuário','Tipo','Etapa','Status','Criado em','Decisão'],(data||[]).map(v=>`<tr><td>${esc(v.id.slice(0,8))}</td><td>${esc(v.user_id)}</td><td>${esc(v.account_type)}</td><td>${esc(v.verification_type)}</td><td>${statusPill(v.status)}</td><td>${date(v.created_at)}</td><td>${date(v.decided_at)}</td></tr>`));
+  }
+
+  async function loadLocations() {
+    const {data,error}=await sb.from('ride_live_locations').select('ride_id,driver_id,latitude,longitude,accuracy_meters,recorded_at').order('recorded_at',{ascending:false}).limit(200);
+    if(error)throw error;
+    $('locationsTable').innerHTML=table(['Corrida','Motorista','Latitude','Longitude','Precisão','Atualizado'],(data||[]).map(l=>`<tr><td>${esc(l.ride_id.slice(0,8))}</td><td>${esc(l.driver_id.slice(0,8))}</td><td>${l.latitude}</td><td>${l.longitude}</td><td>${l.accuracy_meters??'—'} m</td><td>${date(l.recorded_at)}</td></tr>`));
+    updateMap(data||[]);
+  }
+
+  function updateMap(locations) {
+    if (!cfg.GOOGLE_MAPS_API_KEY) { $('mapMessage').textContent='Chave Google Maps ainda não configurada em config.js.'; return; }
+    if (!window.google?.maps) { $('mapMessage').textContent='Google Maps não carregado. Confira a chave e as restrições da API.'; return; }
+    if (!map) map = new google.maps.Map($('liveMap'), {center:{lat:-23.5505,lng:-46.6333},zoom:5,mapTypeControl:false,streetViewControl:false});
+    const seen = new Set();
+    locations.forEach(l=>{
+      seen.add(l.ride_id);
+      const pos={lat:Number(l.latitude),lng:Number(l.longitude)};
+      let marker=markers.get(l.ride_id);
+      if(!marker){marker=new google.maps.Marker({map,position:pos,title:'Corrida '+l.ride_id.slice(0,8)});markers.set(l.ride_id,marker);}
+      else marker.setPosition(pos);
+    });
+    for(const [id,marker] of markers){if(!seen.has(id)){marker.setMap(null);markers.delete(id);}}
+    if(locations.length) map.setCenter({lat:Number(locations[0].latitude),lng:Number(locations[0].longitude)});
+    $('mapMessage').textContent=locations.length?`${locations.length} localização(ões) recebida(s).`:'Nenhuma localização GPS recebida ainda.';
+  }
+
+  async function refreshAll() {
+    try { await Promise.all([loadOverview(),loadRides(),loadDrivers(),loadReviews(),loadLocations()]); msg('Conectado ao Supabase. Dados atualizados.',true); }
+    catch(e) { msg('Falha ao consultar dados: '+(e.message||e),false); }
+  }
+
+  async function enterPanel(session) {
+    currentUser=session.user;
+    const {data:roleData,error:roleError}=await sb.from('user_roles').select('role').eq('user_id',currentUser.id).eq('role','admin').maybeSingle();
+    if(roleError)throw roleError;
+    if(!roleData){await sb.auth.signOut();throw new Error('Esta conta não possui permissão de administrador.');}
+    loginArea.classList.add('hidden');adminArea.classList.remove('hidden');
+    $('adminIdentity').textContent=currentUser.email||'Administrador autorizado';
+    await refreshAll();
+    if(channel)sb.removeChannel(channel);
+    channel=sb.channel('focus-admin-live')
+      .on('postgres_changes',{event:'*',schema:'public',table:'rides'},()=>refreshAll())
+      .on('postgres_changes',{event:'*',schema:'public',table:'ride_live_locations'},()=>loadLocations().catch(e=>msg(e.message,false)))
+      .on('postgres_changes',{event:'*',schema:'public',table:'verification_cases'},()=>loadReviews().catch(e=>msg(e.message,false)))
+      .subscribe();
+  }
+
+  async function init() {
+    if(!window.supabase?.createClient){$('loginMessage').textContent='Não foi possível carregar a biblioteca do Supabase.';return;}
+    if(!cfg.SUPABASE_URL||!cfg.SUPABASE_PUBLISHABLE_KEY){$('loginMessage').textContent='Configure SUPABASE_URL e SUPABASE_PUBLISHABLE_KEY em config.js.';return;}
+    sb=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_PUBLISHABLE_KEY);
+    $('loginForm').addEventListener('submit',async e=>{
+      e.preventDefault();$('loginMessage').textContent='Validando acesso…';
+      const {data,error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});
+      if(error){$('loginMessage').textContent='Não foi possível entrar: '+error.message;return;}
+      try{await enterPanel(data.session);}catch(err){$('loginMessage').textContent=err.message;}
+    });
+    $('logoutBtn').addEventListener('click',async()=>{if(channel)await sb.removeChannel(channel);await sb.auth.signOut();location.reload();});
+    document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>{
+      document.querySelectorAll('.panel-section').forEach(s=>s.classList.remove('active'));
+      $('tab-'+b.dataset.tab).classList.add('active');
+    }));
+    $('refreshRides').onclick=()=>loadRides().catch(e=>msg(e.message,false));
+    $('refreshDrivers').onclick=()=>loadDrivers().catch(e=>msg(e.message,false));
+    $('refreshReviews').onclick=()=>loadReviews().catch(e=>msg(e.message,false));
+    const {data:{session}}=await sb.auth.getSession();
+    if(session){try{await enterPanel(session);}catch(e){$('loginMessage').textContent=e.message;}}
+  }
+  init();
+})();
+</script>
+<script>
+(function loadMaps(){
+ const key=(window.FOCUS_CONFIG||{}).GOOGLE_MAPS_API_KEY;
+ if(!key)return;
+ const s=document.createElement('script');
+ s.src='https://maps.googleapis.com/maps/api/js?key='+encodeURIComponent(key);
+ s.async=true;s.defer=true;document.head.appendChild(s);
+})();
+</script>
+</body>
+</html>
