@@ -1,0 +1,62 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cadastro do Motorista • Focus</title><link rel="stylesheet" href="styles.css"></head><body><div class="wrap"><header class="header"><a href="index.html"><img src="assets/logo.png" alt="Focus"></a><div><div class="brand">FOCUS<small>CADASTRO DO MOTORISTA</small></div><div class="slogan">Sua cidade. Seu caminho. Sua liberdade.</div></div></header><p><a href="index.html">← Voltar ao início</a></p><section class="hero"><div class="eyebrow">Faça parte da Focus</div><h1>Cadastre-se como motorista</h1><p class="muted">Crie sua conta de motorista e cadastre os dados do veículo. Se você já possui conta de passageiro, não crie outra: solicite a migração pela sua área de passageiro.</p><div id="backendState"></div></section><form id="signupForm" class="card">
+<h2>Criar conta de motorista</h2>
+<label>Nome completo<input id="fullName" required autocomplete="name" placeholder="Seu nome"></label>
+<label>E-mail<input id="email" type="email" required autocomplete="email" placeholder="voce@email.com"></label>
+<label>Telefone<input id="phone" type="tel" required autocomplete="tel" placeholder="(00) 00000-0000"></label>
+<label>Senha<input id="password" type="password" required minlength="8" autocomplete="new-password" placeholder="Mínimo de 8 caracteres"></label>
+<hr style="border-color:#333;margin:22px 0">
+<h2>Dados do veículo</h2>
+<label>Modelo<input id="vehicleModel" required placeholder="Ex.: sedan, hatch, SUV"></label>
+<div class="row"><div><label>Placa<input id="vehiclePlate" required maxlength="8" placeholder="ABC1D23"></label></div><div><label>Ano do veículo<input id="vehicleYear" type="number" min="1990" max="2035" required placeholder="2022"></label></div></div>
+<div id="signupMessage" class="notice" aria-live="polite">Uma pessoa utiliza um único cadastro. Se seu e-mail já pertence a uma conta de passageiro, entre pela área de passageiro e solicite a migração para motorista. A aprovação será feita pelo administrador.</div>
+<button class="btn" type="submit">Criar minha conta</button>
+<p class="muted small">Já tem cadastro? <a href="#" id="showLogin">Entrar na minha conta</a></p>
+</form>
+<form id="loginForm" class="card hidden">
+<h2>Entrar na Focus</h2>
+<label>E-mail<input id="loginEmail" type="email" required autocomplete="email" placeholder="voce@email.com"></label>
+<label>Senha<input id="loginPassword" type="password" required autocomplete="current-password" placeholder="Sua senha"></label>
+<div id="loginMessage" class="notice" aria-live="polite">Entre com o e-mail e a senha cadastrados.</div>
+<button class="btn" type="submit">Entrar</button>
+<p class="muted small">Ainda não tem conta? <a href="#" id="showSignup">Criar cadastro</a></p>
+</form>
+<section id="accountPanel" class="card hidden"><h2>Conta conectada</h2><p id="accountInfo" class="muted"></p><p id="accountTypeInfo" class="notice"></p><button id="logoutButton" class="btn secondary" type="button">Sair da conta</button></section>
+<section id="driverVerificationPanel" class="card hidden">
+<h2>Etapa 1 — Documentos para aprovação</h2>
+<p class="muted">Envie todos os documentos obrigatórios. Os arquivos ficam privados e só podem ser consultados por você e pela equipe administrativa autorizada.</p>
+<form id="driverVerificationForm">
+<label>CNH com EAR — frente e verso em um arquivo (PDF ou imagem)<input id="docCnh" type="file" accept="image/*,.pdf" required></label>
+<label>CRLV regular (PDF ou imagem)<input id="docCrlv" type="file" accept="image/*,.pdf" required></label>
+<label>Certidão negativa criminal (PDF ou imagem)<input id="docCriminal" type="file" accept="image/*,.pdf" required></label>
+<label>Comprovante de endereço (PDF ou imagem)<input id="docAddress" type="file" accept="image/*,.pdf" required></label>
+<label>Selfie para comparação facial com a CNH<input id="docSelfie" type="file" accept="image/*" capture="user" required></label>
+<p class="small muted">A selfie será usada para comparação manual nesta etapa. A prova de vida automatizada dependerá da integração com um fornecedor especializado.</p>
+<label class="small"><input id="privacyConsent" type="checkbox" required> Confirmo que os documentos são meus e autorizo o tratamento dos dados para análise de cadastro e prevenção a fraude, conforme o aviso de privacidade da Focus.</label>
+<div id="verificationMessage" class="notice" aria-live="polite">Todos os cinco itens são obrigatórios para enviar à análise.</div>
+<button class="btn" type="submit">Enviar documentos para análise</button>
+</form>
+<div id="driverVerificationStatus" class="notice hidden"></div>
+</section>
+<section id="driverCompletionPanel" class="card hidden">
+<h2>Etapa 2 — Finalizar cadastro</h2>
+<p class="muted">Após a aprovação dos documentos, confirme seus dados e envie uma foto de perfil.</p>
+<form id="driverCompletionForm">
+<label>Foto de perfil<input id="driverAvatar" type="file" accept="image/jpeg,image/png,image/webp"></label>
+<label>Modelo do veículo<input id="completeVehicleModel" required></label>
+<div class="row"><div><label>Placa<input id="completeVehiclePlate" required maxlength="8"></label></div><div><label>Ano<input id="completeVehicleYear" type="number" min="1990" max="2035" required></label></div></div>
+<div id="completionMessage" class="notice" aria-live="polite"></div>
+<button class="btn" type="submit">Salvar e concluir cadastro</button>
+</form>
+</section>
+<section id="driverAdditionalPanel" class="card hidden">
+<h2>Documentos adicionais solicitados</h2><p class="muted">A Focus poderá solicitar documentos complementares. Envie cada arquivo solicitado nesta área.</p>
+<div id="additionalDocsList" class="empty">Carregando solicitações…</div>
+</section>
+<section id="driverOperationsPanel" class="card hidden">
+<h2>Central do motorista</h2><div id="driverOperationalStatus" class="notice"></div>
+<p class="muted">Sua localização será compartilhada com a Focus enquanto você estiver online. Permita o acesso ao GPS e mantenha esta página aberta.</p>
+<div class="row"><button id="driverGoOnline" class="btn" type="button">Ficar online</button><button id="driverGoOffline" class="btn secondary" type="button">Ficar offline</button></div>
+<div id="driverGpsStatus" class="small muted" aria-live="polite"></div>
+<h3>Mensagens da Focus</h3><div id="driverMessages" class="empty">Carregando mensagens…</div>
+</section>
+<footer class="footer"><a href="index.html">Voltar para Focus Mobilidade</a></footer></div><script src="config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js"></script></body></html>
